@@ -16,3 +16,11 @@ export const Title = styled.h1`
   font-size: 100px;
   text-shadow: 0 0 5px #34B2E4, 0 0 20px #184aaa, 0 0 40px #051f7c;
 `
+
+export const InfoList = styled.div`
+  color: #21F9FB;
+
+  div {
+    padding: 5px 0px;
+  }
+`
