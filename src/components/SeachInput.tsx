@@ -24,9 +24,14 @@ const SearchIcon = styled(MdSearch)`
   left: 8px;
 `
 
-const SearchInput: React.FunctionComponent = props => (
+type InputTypes = {
+  onChange: (e: React.FormEvent<HTMLInputElement>) => void
+  onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
+const SearchInput = (props: InputTypes) => (
   <Wrapper>
-    <Input placeholder='Enter the url of your repo' />
+    <Input placeholder='Enter the url of your repo' onChange={props.onChange} onKeyPress={props.onKeyPress} />
     <SearchIcon color='#34B2E4' size='40px' />
   </Wrapper>
 )
