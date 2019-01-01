@@ -1,7 +1,7 @@
 import React, { Component, Suspense } from 'react';
 import { Page, Title } from './styled/common'
 import SearchInput from './components/SeachInput'
-import GifLoader from './components/GifLoader'
+import GifLoader, { PreloadLoader } from './components/GifLoader'
 import Never from './utils/never'
 
 const InfoPage = React.lazy(() => import('./components/InfoPage'))
@@ -14,12 +14,13 @@ type RepoDetails = {
 }
 
 type AppState = {
-  url: String,
+  url: string,
   toRender: Render,
   fileNames: String[],
   error: Boolean,
   errorMessage: String,
-  repoDetails: RepoDetails
+  repoDetails: RepoDetails,
+  animateInput: Boolean
 }
 
 const API_URL: string = 'https://api.github.com/repos/'
@@ -34,8 +35,11 @@ class App extends Component<Object, AppState> {
     repoDetails: {
       name: '',
       owner: ''
-    }
+    },
+    animateInput: false
   }
+
+  componentDidMount = () => PreloadLoader()
 
   handleInput = (e: React.FormEvent<HTMLInputElement>) => {
     this.setState({ url: e.currentTarget.value })
@@ -46,6 +50,10 @@ class App extends Component<Object, AppState> {
       this.setState({ toRender: 'loader' })
       this.fetchData(this.state.url)
     }
+  }
+
+  handleAnimate = () => {
+    this.setState(prevState => ({ animateInput: !prevState.animateInput }))
   }
 
   getData = (url: String): [String, String] => {
@@ -76,7 +84,7 @@ class App extends Component<Object, AppState> {
       case "input": return (
         <Page>
           <Title>Packlist</Title>,
-          <SearchInput onChange={this.handleInput} onKeyPress={this.handleKeyPress} />
+          <SearchInput onChange={this.handleInput} onKeyPress={this.handleKeyPress} animateInput={this.state.animateInput} animate={this.handleAnimate} value={this.state.url} />
         </Page>
       )
       case "loader": return (
