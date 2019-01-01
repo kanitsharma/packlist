@@ -1,5 +1,5 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 export const Page = styled.div`
   display: flex;
@@ -8,12 +8,11 @@ export const Page = styled.div`
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: #000001;
-`
+  background: #fff;
+`;
 
 export const Title = styled.h1`
-  color: #21F9FB;
+  color: ${props => props.theme.colors.black};
   font-size: 130px;
   line-height: 0.2;
-  text-shadow: 0 0 5px #34B2E4, 0 0 20px #184aaa, 0 0 40px #051f7c;
-`
+`;

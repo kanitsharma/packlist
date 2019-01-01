@@ -21,13 +21,15 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@hellpack/eslint": "^0.1.0",
+    "prettier": "^1.15.3",
+    "typescript-eslint-parser": "^21.0.2"
+  }
 }
