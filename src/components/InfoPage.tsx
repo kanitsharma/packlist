@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Page } from '../styled/common';
 import { RouteComponentProps } from '@reach/router';
-import GifLoader from '../components/GifLoader';
 
 const InfoPage = styled(Page)`
   justify-content: flex-start;
@@ -32,11 +31,40 @@ type InfoType = {
 };
 
 type InfoState = {
-  prettier: Boolean;
-  eslint: Boolean;
+  fileNames: string[],
+  error: Boolean,
+  errorMessage: string
 };
 
-class Info extends React.Component<InfoType> {
+const API_URL: string = 'https://api.github.com/repos/';
+
+class Info extends React.Component<InfoType & RouteComponentProps, InfoState> {
+  state: InfoState = {
+    fileNames: [],
+    error: false,
+    errorMessage: ''
+  }
+
+  componentDidMount() {
+    const { username, repo } = this.props
+    this.fetchData(`${username}/${repo}`)
+  }
+
+  fetchData = (url: String) => {
+    Promise.all([
+      fetch(API_URL + url + '/contents'),
+      fetch(API_URL + url)
+    ])
+      .then(([x, y]) => Promise.all([x.json(), y.json()]))
+      .then(([x, y]) => {
+        if (x.message || y.message) {
+          this.setState({ error: true, errorMessage: x.message })
+        } else {
+          this.setState({ fileNames: x.map((x: { name: String }) => x.name) })
+        }
+      })
+  }
+
   render() {
     return (
       <InfoPage>
@@ -54,14 +82,4 @@ class Info extends React.Component<InfoType> {
   }
 }
 
-export default (props: RouteComponentProps & InfoType) => (
-  <React.Suspense
-    fallback={
-      <Page>
-        <GifLoader />
-      </Page>
-    }
-  >
-    <Info {...props} />
-  </React.Suspense>
-);
+export default Info
