@@ -1,17 +1,25 @@
-import React, { Component, FormEvent } from 'react';
-import { Page, Title, InfoList } from './styled/common'
+import React, { Component, Suspense } from 'react';
+import { Page, Title } from './styled/common'
 import SearchInput from './components/SeachInput'
 import GifLoader from './components/GifLoader'
 import Never from './utils/never'
 
+const InfoPage = React.lazy(() => import('./components/InfoPage'))
+
 type Render = 'input' | 'loader' | 'info'
+
+type RepoDetails = {
+  name: String,
+  owner: String
+}
 
 type AppState = {
   url: String,
   toRender: Render,
   fileNames: String[],
   error: Boolean,
-  errorMessage: String
+  errorMessage: String,
+  repoDetails: RepoDetails
 }
 
 const API_URL: string = 'https://api.github.com/repos/'
@@ -22,7 +30,11 @@ class App extends Component<Object, AppState> {
     toRender: 'input',
     fileNames: [],
     error: false,
-    errorMessage: ''
+    errorMessage: '',
+    repoDetails: {
+      name: '',
+      owner: ''
+    }
   }
 
   handleInput = (e: React.FormEvent<HTMLInputElement>) => {
@@ -44,30 +56,43 @@ class App extends Component<Object, AppState> {
 
   fetchData = (url: String) => {
     const [username, repo] = this.getData(url)
-    fetch(API_URL + username + '/' + repo + '/contents')
-      .then(res => res.json())
-      .then(res => {
-        if (res.message) {
-          this.setState({ error: true, errorMessage: res.message })
+    Promise.all([
+      fetch(API_URL + username + '/' + repo + '/contents'),
+      fetch(API_URL + username + '/' + repo)
+    ])
+      .then(([x, y]) => Promise.all([x.json(), y.json()]))
+      .then(([x, y]) => {
+        if (x.message || y.message) {
+          this.setState({ error: true, errorMessage: x.message })
         } else {
-          this.setState({ fileNames: res.map((x: { name: String }) => x.name), toRender: 'info' })
+          this.setState({ toRender: 'info', fileNames: x.map((x: { name: String }) => x.name), repoDetails: { owner: y.owner.login, name: y.name } })
         }
       })
+
   }
 
   componentSwitcher = (S: Render): React.ReactNode => {
     switch (S) {
-      case "input": return ([
-        <Title>Git Checker</Title>,
-        <SearchInput onChange={this.handleInput} onKeyPress={this.handleKeyPress} />
-      ])
-
+      case "input": return (
+        <Page>
+          <Title>Packlist</Title>,
+          <SearchInput onChange={this.handleInput} onKeyPress={this.handleKeyPress} />
+        </Page>
+      )
       case "loader": return (
-        <GifLoader />
+        <Page>
+          <GifLoader />
+        </Page>
       )
 
       case "info": return (
-        <InfoList>{this.state.fileNames.map(x => <div>{x}</div>)}</InfoList>
+        <Suspense fallback={
+          <Page>
+            <GifLoader />
+          </Page>
+        }>
+          <InfoPage repoDetails={this.state.repoDetails} fileList={this.state.fileNames} />
+        </Suspense>
       )
 
       default: return Never(S)
@@ -75,11 +100,7 @@ class App extends Component<Object, AppState> {
   }
 
   render() {
-    return (
-      <Page>
-        {this.componentSwitcher(this.state.toRender)}
-      </Page>
-    );
+    return this.componentSwitcher(this.state.toRender)
   }
 }
 
