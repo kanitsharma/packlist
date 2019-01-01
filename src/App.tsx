@@ -4,10 +4,11 @@ import SearchInput from './components/SeachInput';
 import Search from './components/Search';
 import GifLoader, { PreloadLoader } from './components/GifLoader';
 import Never from './utils/never';
+import { RouteComponentProps } from '@reach/router';
 
 const InfoPage = React.lazy(() => import('./components/InfoPage'));
 
-type Render = 'input' | 'loader' | 'info';
+type Render = 'input' | 'loader';
 
 type RepoDetails = {
   name: String;
@@ -26,7 +27,7 @@ type AppState = {
 
 const API_URL: string = 'https://api.github.com/repos/';
 
-class App extends Component<Object, AppState> {
+class App extends Component<RouteComponentProps, AppState> {
   state: AppState = {
     url: '',
     toRender: 'input',
@@ -49,7 +50,8 @@ class App extends Component<Object, AppState> {
   handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && this.state.url.length !== 0) {
       this.setState({ toRender: 'loader' });
-      this.fetchData(this.state.url);
+      const [username, repo] = this.getData(this.state.url);
+      this.props.navigate && this.props.navigate(`/repo/${this.state.url}`);
     }
   };
 
@@ -71,7 +73,6 @@ class App extends Component<Object, AppState> {
           this.setState({ error: true, errorMessage: x.message });
         } else {
           this.setState({
-            toRender: 'info',
             fileNames: x.map((x: { name: String }) => x.name),
             repoDetails: { owner: y.owner.login, name: y.name },
           });
@@ -94,19 +95,6 @@ class App extends Component<Object, AppState> {
           <Page>
             <GifLoader />
           </Page>
-        );
-
-      case 'info':
-        return (
-          <Suspense
-            fallback={
-              <Page>
-                <GifLoader />
-              </Page>
-            }
-          >
-            <InfoPage repoDetails={this.state.repoDetails} fileList={this.state.fileNames} />
-          </Suspense>
         );
 
       default:

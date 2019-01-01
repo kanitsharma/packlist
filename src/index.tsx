@@ -1,13 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import { ThemeProvider } from 'styled-components';
+import { Router } from '@reach/router';
 import theme from './theme';
+import App from './App';
+
+const InfoPage = React.lazy(() => import('./components/InfoPage'));
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-    <App />
+    <Router>
+      <App path="/" />
+      <InfoPage path="/repo/:username/:repo" />
+    </Router>
   </ThemeProvider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

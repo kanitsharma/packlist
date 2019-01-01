@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Page } from '../styled/common';
+import { RouteComponentProps } from '@reach/router';
+import GifLoader from '../components/GifLoader';
 
 const InfoPage = styled(Page)`
   justify-content: flex-start;
@@ -24,12 +26,9 @@ const InfoItem = styled.div`
   text-decoration: ${(props: { checked: Boolean }) => props.checked && 'line-through'};
 `;
 
-type InfoTypes = {
-  fileList: String[];
-  repoDetails: {
-    owner: String;
-    name: String;
-  };
+type InfoType = {
+  username?: string;
+  repo?: string;
 };
 
 type InfoState = {
@@ -37,17 +36,13 @@ type InfoState = {
   eslint: Boolean;
 };
 
-export default class extends React.Component<InfoTypes, Object> {
+class Info extends React.Component<InfoType> {
   render() {
-    const {
-      fileList,
-      repoDetails: { owner, name },
-    } = this.props;
     return (
       <InfoPage>
         <InfoHeader>
-          {owner}/<br />
-          {name}
+          {this.props.username}/<br />
+          {this.props.repo}
         </InfoHeader>
         <InfoList>{/* {
             Checklist.map(x => (
@@ -58,3 +53,15 @@ export default class extends React.Component<InfoTypes, Object> {
     );
   }
 }
+
+export default (props: RouteComponentProps & InfoType) => (
+  <React.Suspense
+    fallback={
+      <Page>
+        <GifLoader />
+      </Page>
+    }
+  >
+    <Info {...props} />
+  </React.Suspense>
+);
