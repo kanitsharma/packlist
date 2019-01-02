@@ -17,6 +17,10 @@ const InfoHeader = styled.div`
   font-weight: bold;
 `;
 
+const InfoDetails = styled(InfoHeader)`
+  font-size: 20px;
+`
+
 const InfoList = styled.div``;
 
 const InfoItem = styled.div`
@@ -33,7 +37,10 @@ type InfoType = {
 type InfoState = {
   fileNames: string[],
   error: Boolean,
-  errorMessage: string
+  errorMessage: string,
+  repoDetails: {
+    description: number
+  }
 };
 
 const API_URL: string = 'https://api.github.com/repos/';
@@ -42,7 +49,10 @@ class Info extends React.Component<InfoType & RouteComponentProps, InfoState> {
   state: InfoState = {
     fileNames: [],
     error: false,
-    errorMessage: ''
+    errorMessage: '',
+    repoDetails: {
+      description: 0
+    }
   }
 
   componentDidMount() {
@@ -60,7 +70,8 @@ class Info extends React.Component<InfoType & RouteComponentProps, InfoState> {
         if (x.message || y.message) {
           this.setState({ error: true, errorMessage: x.message })
         } else {
-          this.setState({ fileNames: x.map((x: { name: String }) => x.name) })
+          console.log(y)
+          this.setState({ fileNames: x.map((x: { name: String }) => x.name), repoDetails: y })
         }
       })
   }
@@ -72,6 +83,7 @@ class Info extends React.Component<InfoType & RouteComponentProps, InfoState> {
           {this.props.username}/<br />
           {this.props.repo}
         </InfoHeader>
+        <InfoDetails>{this.state.repoDetails.description} stars</InfoDetails>
         <InfoList>{/* {
             Checklist.map(x => (
               <InfoItem checked={fileList.includes(x)} >{x}</InfoItem>
